@@ -303,7 +303,10 @@
             return `
                 <div class="flex justify-between items-start mb-4">
                     <h2 class="text-xl font-bold text-slate-800 pr-2">${item.매체명 || ''}</h2>
-                    <button data-action="edit" data-id="${item.id}" class="text-xs text-slate-400 hover:text-blue-600 shrink-0">수정</button>
+                    <div class="flex flex-col items-end space-y-1">
+                        <button data-action="edit" data-id="${item.id}" class="text-xs text-slate-400 hover:text-blue-600 shrink-0">수정</button>
+                        <button data-action="delete" data-id="${item.id}" class="text-xs text-red-500 hover:text-red-700 shrink-0">삭제</button>
+                    </div>
                 </div>
                 <div class="flex-grow">
                     <div class="flex flex-wrap gap-2 mb-4">${categoryTagsHtml}</div>
@@ -397,8 +400,11 @@
             
             setTimeout(() => {
                 toast.classList.add('opacity-0');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 5000);
+                // 트랜지션이 끝난 후 요소를 제거하는 대신, 일정 시간 후 바로 제거하여 안정성 확보
+                setTimeout(() => {
+                    toast.remove();
+                }, 500); // 0.5초는 CSS 트랜지션 시간과 일치
+            }, 2000); // 2초 후에 사라지기 시작
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -489,13 +495,29 @@
             });
             
             mediaList.addEventListener('click', function(e) {
-                const target = e.target.closest('button');
-                if (!target) return;
+                const button = e.target.closest('button');
+                if (!button) return;
 
-                const action = target.dataset.action;
-                const cardElement = target.closest('[id^="card-"]');
+                const cardElement = button.closest('[id^="card-"]');
                 if (!cardElement) return;
 
+                // Copy Button Logic
+                if (button.classList.contains('copy-button')) {
+                    const textToCopy = button.dataset.clipboard;
+                    if (copyTextToClipboard(textToCopy)) {
+                        showToast(`'${textToCopy}' 복사 완료!`);
+                        button.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                        setTimeout(() => {
+                            button.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                        }, 1500);
+                    } else {
+                        showToast('복사에 실패했습니다.', 'error');
+                    }
+                    return; // Stop further execution for copy buttons
+                }
+
+                // Other Actions Logic
+                const action = button.dataset.action;
                 const id = Number(cardElement.id.replace('card-', ''));
                 const itemIndex = mediaData.findIndex(item => item.id === id);
 
@@ -503,7 +525,21 @@
                     if (itemIndex > -1) {
                        cardElement.innerHTML = generateCardEditView(mediaData[itemIndex]);
                     }
-                } else if (action === 'cancel') {
+                } else if (action === 'delete') {
+                    cardElement.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full p-4">
+                            <p class="text-sm text-center font-semibold mb-4">정말로 삭제하시겠습니까?</p>
+                            <div class="flex space-x-2">
+                                <button type="button" data-action="cancel-delete" data-id="${id}" class="px-3 py-1 text-sm rounded-md bg-slate-200 hover:bg-slate-300">취소</button>
+                                <button type="button" data-action="confirm-delete" data-id="${id}" class="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">확인</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (action === 'confirm-delete') {
+                    const newDataArray = mediaData.filter(item => item.id !== id);
+                    saveDataToFirebase(newDataArray);
+                    showToast('삭제되었습니다.', 'success');
+                } else if (action === 'cancel' || action === 'cancel-delete') {
                     if (cardElement.dataset.isNew === 'true') {
                         cardElement.remove();
                     } else {
@@ -532,19 +568,6 @@
                         newDataArray = [updatedItem, ...mediaData];
                     }
                     saveDataToFirebase(newDataArray);
-
-                } else if (target.closest('.copy-button')) {
-                    const textToCopy = target.closest('.copy-button').dataset.clipboard;
-                    if (copyTextToClipboard(textToCopy)) {
-                        showToast(`'${textToCopy}' 복사 완료!`);
-                        const iconContainer = target.closest('.copy-button');
-                        iconContainer.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-                        setTimeout(() => {
-                            iconContainer.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
-                        }, 1500);
-                    } else {
-                        showToast('복사에 실패했습니다.', 'error');
-                    }
                 }
             });
 
