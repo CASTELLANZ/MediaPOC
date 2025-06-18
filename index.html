@@ -244,14 +244,11 @@
             const allCategories = new Set(mediaData.flatMap(item => item.카테고리).filter(Boolean));
             const sortedCategories = [...allCategories].sort();
             
-            const allButton = document.createElement('button');
-            allButton.className = 'category-tag px-3 py-1.5 rounded-full text-sm font-semibold bg-blue-600 text-white';
-            allButton.textContent = '전체';
-            allButton.dataset.category = 'all';
-            categoryTagsContainer.appendChild(allButton);
-
+            // '전체' 버튼 생성 로직 삭제
+            
             sortedCategories.forEach(category => {
                 const button = document.createElement('button');
+                // 기본 상태를 비활성 상태로 변경
                 button.className = 'category-tag px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300';
                 button.textContent = category;
                 button.dataset.category = category;
@@ -285,13 +282,13 @@
             let infoHtml = '';
             const createRow = (label, value, clipValue) => {
                 if (!value) return '';
-                const copyButton = clipValue ? `<button class="copy-button ml-auto shrink-0" data-clipboard="${clipValue}" aria-label="${label} 복사"><svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button></div>` : '';
+                const copyButton = clipValue ? `<button class="copy-button ml-auto shrink-0" data-clipboard="${clipValue}" aria-label="${label} 복사"><svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>` : '';
                 return `<div class="flex items-center"><span class="font-semibold text-slate-500 w-20 shrink-0">${label}</span><span class="text-slate-700 truncate" title="${value}">${value}</span>${copyButton}</div>`;
             };
 
             const contactPerson = item.담당자 ? `${item.담당자}${item.직책 ? ` / ${item.직책}` : ''}` : '';
             infoHtml += createRow('담당자', contactPerson);
-            infoHtml += createRow('개인메일', item.이메일, item.이메일);
+            infoHtml += createRow('이메일', item.이메일, item.이메일);
             infoHtml += createRow('팀메일', item.팀메일, item.팀메일);
             infoHtml += createRow('연락처', item.연락처, item.연락처);
             infoHtml += createRow('판매 대행사', item['판매 대행사'], item['판매 대행사']);
@@ -301,11 +298,11 @@
                 : `<button class="w-full text-center block bg-slate-300 text-slate-500 font-semibold text-sm py-2 px-4 rounded-lg cursor-not-allowed" disabled>소개서 없음</button>`;
             
             return `
-                <div class="flex justify-between items-start mb-4">
-                    <h2 class="text-xl font-bold text-slate-800 pr-2">${item.매체명 || ''}</h2>
-                    <div class="flex flex-col items-end space-y-1">
-                        <button data-action="edit" data-id="${item.id}" class="text-xs text-slate-400 hover:text-blue-600 shrink-0">수정</button>
-                        <button data-action="delete" data-id="${item.id}" class="text-xs text-red-500 hover:text-red-700 shrink-0">삭제</button>
+                <div class="flex justify-between items-start gap-2 mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 break-words" title="${item.매체명 || ''}">${item.매체명 || ''}</h2>
+                    <div class="flex flex-col items-end space-y-1 flex-shrink-0">
+                        <button data-action="edit" data-id="${item.id}" class="text-xs text-slate-400 hover:text-blue-600">수정</button>
+                        <button data-action="delete" data-id="${item.id}" class="text-xs text-red-500 hover:text-red-700">삭제</button>
                     </div>
                 </div>
                 <div class="flex-grow">
@@ -332,7 +329,7 @@
                     ${createInput('카테고리', '카테고리 (쉼표로 구분)', (item.카테고리 || []).join(', '))}
                     ${createInput('담당자', '담당자', item.담당자)}
                     ${createInput('직책', '직책', item.직책)}
-                    ${createInput('이메일', '개인메일', item.이메일)}
+                    ${createInput('이메일', '이메일', item.이메일)}
                     ${createInput('팀메일', '팀메일', item.팀메일)}
                     ${createInput('연락처', '연락처', item.연락처)}
                     ${createInput('판매 대행사', '판매 대행사', item['판매 대행사'])}
@@ -357,7 +354,7 @@
                 const matchesSearch = (item.매체명 || '').toLowerCase().includes(searchTerm) || 
                                       (item.담당자 || '').toLowerCase().includes(searchTerm);
                 let matchesCategory = true;
-                if (selectedCategories.length > 0 && !selectedCategories.includes('all')) {
+                if (selectedCategories.length > 0) { // '전체' 버튼이 없으므로 조건 단순화
                     matchesCategory = selectedCategories.some(cat => (item.카테고리 || []).includes(cat));
                 }
                 return matchesSearch && matchesCategory;
@@ -465,26 +462,14 @@
             categoryTagsContainer.addEventListener('click', (e) => {
                 const target = e.target.closest('.category-tag');
                 if (!target) return;
-                const category = target.dataset.category;
-                const allButton = categoryTagsContainer.querySelector('[data-category="all"]');
-                if (category === 'all') {
-                    categoryTagsContainer.querySelectorAll('.category-tag').forEach(btn => {
-                        btn.classList.remove('bg-blue-600', 'text-white');
-                        btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                    });
-                    target.classList.add('bg-blue-600', 'text-white');
-                    target.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                } else {
-                    allButton.classList.remove('bg-blue-600', 'text-white');
-                    allButton.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                    target.classList.toggle('bg-blue-600');
-                    target.classList.toggle('text-white');
-                    target.classList.toggle('bg-slate-200');
-                    target.classList.toggle('text-slate-700');
-                    target.classList.toggle('hover:bg-slate-300');
-                }
-                const activeTags = categoryTagsContainer.querySelectorAll('.bg-blue-600');
-                if (activeTags.length === 0 && allButton) { allButton.click(); }
+                
+                // 클릭한 버튼의 활성/비활성 상태를 토글
+                target.classList.toggle('bg-blue-600');
+                target.classList.toggle('text-white');
+                target.classList.toggle('bg-slate-200');
+                target.classList.toggle('text-slate-700');
+                target.classList.toggle('hover:bg-slate-300');
+                
                 filterAndRender();
             });
 
