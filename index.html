@@ -113,49 +113,99 @@
         </footer>
     </div>
 
-    <script>
+    <!-- 스크립트를 body의 맨 마지막으로 이동 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         // --- 전역 변수 ---
         let mediaData = [];
         let currentFilteredData = [];
+        let db;
+        let auth;
+        let pocListDocRef;
+        
+        // --- Firebase 초기화 및 설정 ---
+        async function initializeFirebase() {
+            try {
+                const firebaseConfigStr = window.__firebase_config;
+                if (!firebaseConfigStr) {
+                    throw new Error("Firebase config not found.");
+                }
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                const appId = window.__app_id || 'default-app-id';
+                
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                pocListDocRef = doc(db, 'artifacts', appId, 'public', 'poc-list');
 
-        // --- 요소 선택 ---
-        const excelUpload = document.getElementById('excel-upload');
-        const fileNameSpan = document.getElementById('file-name');
-        const searchBox = document.getElementById('search-box');
-        const categoryTagsContainer = document.getElementById('category-tags-container');
-        const mediaList = document.getElementById('media-list');
-        const noResults = document.getElementById('no-results');
-        const toastContainer = document.getElementById('toast-container');
-        const copyAllContainer = document.getElementById('copy-all-container');
-        const copyAllButton = document.getElementById('copy-all-button');
-        const addNewCardButton = document.getElementById('add-new-card-button');
-
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        setupRealtimeListener();
+                        showToast('데이터베이스에 연결되었습니다.', 'success');
+                    } else {
+                        signInAnonymously(auth).catch((error) => {
+                            console.error("Anonymous sign-in failed:", error);
+                            showToast("데이터베이스 인증에 실패했습니다.", "error");
+                        });
+                    }
+                });
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                showToast("Firebase 설정 로딩에 실패했습니다. 환경 변수를 확인하세요.", "error");
+            }
+        }
+        
+        // 실시간 데이터 리스너 설정
+        function setupRealtimeListener() {
+            onSnapshot(pocListDocRef, (doc) => {
+                if (doc.exists()) {
+                    const data = doc.data().media || [];
+                    mediaData = processRawData(data);
+                    populateCategories();
+                    filterAndRender();
+                    showToast('데이터가 실시간으로 업데이트되었습니다.', 'success');
+                } else {
+                    console.log("No data found in the database. Please upload an Excel file.");
+                    mediaData = [];
+                    populateCategories();
+                    filterAndRender();
+                }
+            }, (error) => {
+                console.error("Error listening to database changes:", error);
+                showToast("데이터 업데이트 수신에 실패했습니다.", "error");
+            });
+        }
+        
+        // Firebase에 데이터 저장
+        async function saveDataToFirebase(data) {
+            try {
+                const dataToSave = data.map(({ id, ...rest }) => rest);
+                await setDoc(pocListDocRef, { media: dataToSave });
+                showToast('데이터가 성공적으로 저장되었습니다.', 'success');
+            } catch (error) {
+                console.error("Error saving data to Firebase: ", error);
+                showToast('데이터 저장에 실패했습니다.', 'error');
+            }
+        }
+        
         // --- 데이터 처리 함수 ---
         
         function processRawData(rawData) {
              return rawData.map((row, index) => ({
                 ...row,
-                id: Date.now() + index, // 수정/삭제를 위한 고유 ID 부여
+                id: Date.now() + index,
                 카테고리: (row.카테고리 && typeof row.카테고리 === 'string') 
                           ? row.카테고리.split(',').map(cat => cat.trim()) 
                           : (Array.isArray(row.카테고리) ? row.카테고리 : [])
             }));
         }
 
-        function saveDataToLocalStorage(data) {
-            localStorage.setItem('mediaPocData', JSON.stringify(data));
-        }
-
-        function loadDataFromLocalStorage() {
-            const savedData = localStorage.getItem('mediaPocData');
-            if (savedData) {
-                return JSON.parse(savedData);
-            }
-            return [];
-        }
-
-
         function populateCategories() {
+            const categoryTagsContainer = document.getElementById('category-tags-container');
             categoryTagsContainer.innerHTML = '';
             const allCategories = new Set(mediaData.flatMap(item => item.카테고리).filter(Boolean));
             const sortedCategories = [...allCategories].sort();
@@ -176,6 +226,10 @@
         }
 
         function renderMedia(data) {
+            const mediaList = document.getElementById('media-list');
+            const noResults = document.getElementById('no-results');
+            const copyAllContainer = document.getElementById('copy-all-container');
+
             mediaList.innerHTML = '';
             noResults.classList.toggle('hidden', data.length > 0 || mediaData.length === 0);
             copyAllContainer.classList.toggle('hidden', data.length === 0);
@@ -255,6 +309,9 @@
         }
         
         function filterAndRender() {
+            const searchBox = document.getElementById('search-box');
+            const categoryTagsContainer = document.getElementById('category-tags-container');
+            
             const searchTerm = searchBox.value.toLowerCase().trim();
             const selectedCategoryNodes = categoryTagsContainer.querySelectorAll('.bg-blue-600');
             const selectedCategories = Array.from(selectedCategoryNodes).map(node => node.dataset.category);
@@ -293,6 +350,7 @@
         }
         
         function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
             toast.className = `${bgColor} text-white text-sm font-semibold py-2 px-4 rounded-lg shadow-lg toast-notification opacity-0 transform translate-y-2`;
@@ -303,192 +361,188 @@
                 toast.classList.add('opacity-100', 'transform-none');
             }, 10);
             
-            // Fade-out and remove after 5 seconds
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 toast.addEventListener('transitionend', () => toast.remove());
             }, 5000);
         }
 
-        // --- 이벤트 리스너 설정 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const excelUpload = document.getElementById('excel-upload');
+            const fileNameSpan = document.getElementById('file-name');
+            const searchBox = document.getElementById('search-box');
+            const categoryTagsContainer = document.getElementById('category-tags-container');
+            const mediaList = document.getElementById('media-list');
+            const copyAllButton = document.getElementById('copy-all-button');
+            const addNewCardButton = document.getElementById('add-new-card-button');
 
-        addNewCardButton.addEventListener('click', () => {
-            const newItem = { id: Date.now(), 매체명: '새 매체' }; // 임시 ID와 이름으로 생성
-            
-            const card = document.createElement('div');
-            card.id = `card-${newItem.id}`;
-            card.className = 'bg-white rounded-xl shadow-md p-6 flex flex-col';
-            card.dataset.isNew = 'true'; // 새 카드임을 표시
-            card.innerHTML = generateCardEditView(newItem);
-            
-            mediaList.prepend(card);
-            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-
-        excelUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            fileNameSpan.textContent = file.name;
-            const reader = new FileReader();
-            
-            reader.onload = (event) => {
-                try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    mediaData = processRawData(jsonData);
-                    saveDataToLocalStorage(mediaData);
-
-                    showToast(`${mediaData.length}개의 데이터를 성공적으로 불러왔습니다.`, 'success');
-                    
-                    populateCategories();
-                    filterAndRender();
-
-                } catch (error) {
-                    console.error("파일 처리 중 오류 발생:", error);
-                    showToast("파일을 처리하는 중 오류가 발생했습니다. 파일 형식을 확인해주세요.", "error");
-                }
-            };
-            
-            reader.onerror = (error) => {
-                console.error("파일 읽기 오류:", error);
-                showToast("파일을 읽는 데 실패했습니다.", "error");
-            };
-
-            reader.readAsArrayBuffer(file);
-        });
-
-        categoryTagsContainer.addEventListener('click', (e) => {
-            const target = e.target.closest('.category-tag');
-            if (!target) return;
-            const category = target.dataset.category;
-            const allButton = categoryTagsContainer.querySelector('[data-category="all"]');
-            if (category === 'all') {
-                categoryTagsContainer.querySelectorAll('.category-tag').forEach(btn => {
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                    btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                });
-                target.classList.add('bg-blue-600', 'text-white');
-                target.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-            } else {
-                allButton.classList.remove('bg-blue-600', 'text-white');
-                allButton.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
-                target.classList.toggle('bg-blue-600');
-                target.classList.toggle('text-white');
-                target.classList.toggle('bg-slate-200');
-                target.classList.toggle('text-slate-700');
-                target.classList.toggle('hover:bg-slate-300');
-            }
-            const activeTags = categoryTagsContainer.querySelectorAll('.bg-blue-600');
-            if (activeTags.length === 0 && allButton) { allButton.click(); }
-            filterAndRender();
-        });
-
-        let debounceTimer;
-        searchBox.addEventListener('input', () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(filterAndRender, 200);
-        });
-        
-        mediaList.addEventListener('click', function(e) {
-            const target = e.target.closest('button'); // 버튼만 클릭 대상으로 한정
-            if (!target) return;
-
-            const action = target.dataset.action;
-            const cardElement = target.closest('[id^="card-"]');
-            if (!cardElement) return;
-
-            const id = Number(cardElement.id.replace('card-', ''));
-            const itemIndex = mediaData.findIndex(item => item.id === id);
-
-            if (action === 'edit') {
-                cardElement.innerHTML = generateCardEditView(mediaData[itemIndex]);
-            } else if (action === 'cancel') {
-                 if (cardElement.dataset.isNew === 'true') {
-                    cardElement.remove(); // 새 카드 추가 중 취소하면 카드 삭제
-                 } else {
-                    cardElement.innerHTML = generateCardView(mediaData[itemIndex]);
-                 }
-            } else if (action === 'save') {
-                const form = cardElement.querySelector('form');
-                const formData = new FormData(form);
-                const updatedItem = { id };
+            // --- 이벤트 리스너 설정 ---
+            addNewCardButton.addEventListener('click', () => {
+                const newItem = { id: Date.now(), 매체명: '새 매체' };
                 
-                for (let [key, value] of formData.entries()) {
-                    if (key === '카테고리') {
-                         updatedItem[key] = value.split(',').map(v => v.trim()).filter(Boolean);
+                const card = document.createElement('div');
+                card.id = `card-${newItem.id}`;
+                card.className = 'bg-white rounded-xl shadow-md p-6 flex flex-col';
+                card.dataset.isNew = 'true';
+                card.innerHTML = generateCardEditView(newItem);
+                
+                mediaList.prepend(card);
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            excelUpload.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                fileNameSpan.textContent = file.name;
+                const reader = new FileReader();
+                
+                reader.onload = (event) => {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        const processed = processRawData(jsonData);
+                        saveDataToFirebase(processed);
+
+                    } catch (error) {
+                        console.error("파일 처리 중 오류 발생:", error);
+                        showToast("파일을 처리하는 중 오류가 발생했습니다. 파일 형식을 확인해주세요.", "error");
+                    }
+                };
+                
+                reader.onerror = (error) => {
+                    console.error("파일 읽기 오류:", error);
+                    showToast("파일을 읽는 데 실패했습니다.", "error");
+                };
+
+                reader.readAsArrayBuffer(file);
+            });
+
+            categoryTagsContainer.addEventListener('click', (e) => {
+                const target = e.target.closest('.category-tag');
+                if (!target) return;
+                const category = target.dataset.category;
+                const allButton = categoryTagsContainer.querySelector('[data-category="all"]');
+                if (category === 'all') {
+                    categoryTagsContainer.querySelectorAll('.category-tag').forEach(btn => {
+                        btn.classList.remove('bg-blue-600', 'text-white');
+                        btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                    });
+                    target.classList.add('bg-blue-600', 'text-white');
+                    target.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                } else {
+                    allButton.classList.remove('bg-blue-600', 'text-white');
+                    allButton.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                    target.classList.toggle('bg-blue-600');
+                    target.classList.toggle('text-white');
+                    target.classList.toggle('bg-slate-200');
+                    target.classList.toggle('text-slate-700');
+                    target.classList.toggle('hover:bg-slate-300');
+                }
+                const activeTags = categoryTagsContainer.querySelectorAll('.bg-blue-600');
+                if (activeTags.length === 0 && allButton) { allButton.click(); }
+                filterAndRender();
+            });
+
+            let debounceTimer;
+            searchBox.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(filterAndRender, 200);
+            });
+            
+            mediaList.addEventListener('click', function(e) {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const action = target.dataset.action;
+                const cardElement = target.closest('[id^="card-"]');
+                if (!cardElement) return;
+
+                const id = Number(cardElement.id.replace('card-', ''));
+                const itemIndex = mediaData.findIndex(item => item.id === id);
+
+                if (action === 'edit') {
+                    if (itemIndex > -1) {
+                       cardElement.innerHTML = generateCardEditView(mediaData[itemIndex]);
+                    }
+                } else if (action === 'cancel') {
+                    if (cardElement.dataset.isNew === 'true') {
+                        cardElement.remove();
                     } else {
-                        updatedItem[key] = value;
+                        if (itemIndex > -1) {
+                           cardElement.innerHTML = generateCardView(mediaData[itemIndex]);
+                        }
+                    }
+                } else if (action === 'save') {
+                    const form = cardElement.querySelector('form');
+                    const formData = new FormData(form);
+                    const updatedItem = { id };
+                    
+                    for (let [key, value] of formData.entries()) {
+                        if (key === '카테고리') {
+                            updatedItem[key] = value.split(',').map(v => v.trim()).filter(Boolean);
+                        } else {
+                            updatedItem[key] = value;
+                        }
+                    }
+                    
+                    let newDataArray;
+                    if (itemIndex > -1) {
+                        newDataArray = [...mediaData];
+                        newDataArray[itemIndex] = updatedItem;
+                    } else {
+                        newDataArray = [updatedItem, ...mediaData];
+                    }
+                    saveDataToFirebase(newDataArray);
+
+                } else if (target.closest('.copy-button')) {
+                    const textToCopy = target.closest('.copy-button').dataset.clipboard;
+                    if (copyTextToClipboard(textToCopy)) {
+                        showToast(`'${textToCopy}' 복사 완료!`);
+                        const iconContainer = target.closest('.copy-button');
+                        iconContainer.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                        setTimeout(() => {
+                            iconContainer.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                        }, 1500);
+                    } else {
+                        showToast('복사에 실패했습니다.', 'error');
                     }
                 }
-                
-                if (itemIndex > -1) { // 기존 아이템 수정
-                    mediaData[itemIndex] = updatedItem;
-                } else { // 새 아이템 저장
-                    mediaData.unshift(updatedItem);
-                }
-                
-                saveDataToLocalStorage(mediaData);
-                populateCategories(); 
-                filterAndRender(); 
-                showToast('성공적으로 저장되었습니다.', 'success');
-
-            } else if (target.closest('.copy-button')) {
-                 const textToCopy = target.closest('.copy-button').dataset.clipboard;
-                if (copyTextToClipboard(textToCopy)) {
-                    showToast(`'${textToCopy}' 복사 완료!`);
-                    const iconContainer = target.closest('.copy-button');
-                    iconContainer.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
-                    setTimeout(() => {
-                        iconContainer.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
-                    }, 1500);
-                } else {
-                    showToast('복사에 실패했습니다.', 'error');
-                }
-            }
-        });
-
-        copyAllButton.addEventListener('click', () => {
-            if (currentFilteredData.length === 0) {
-                showToast('복사할 데이터가 없습니다.', 'error');
-                return;
-            }
-            const header = "매체명\t카테고리\t담당자\t직책\t이메일\t팀메일\t연락처\t판매 대행사\t소개서URL";
-            const rows = currentFilteredData.map(item => {
-                const categories = (item.카테고리 || []).join(', ');
-                return [
-                    item.매체명 || '', categories, item.담당자 || '', item.직책 || '',
-                    item.이메일 || '', item.팀메일 || '', item.연락처 || '',
-                    item['판매 대행사'] || '', item['소개서URL'] || ''
-                ].join('\t');
             });
-            const textToCopy = [header, ...rows].join('\n');
-            
-            if(copyTextToClipboard(textToCopy)) {
-                showToast(`${currentFilteredData.length}개 매체의 정보가 복사되었습니다!`);
-            } else {
-                 showToast('전체 복사에 실패했습니다.', 'error');
-            }
-        });
 
-        // --- 초기 실행 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            mediaData = loadDataFromLocalStorage();
-            if(mediaData.length === 0) {
-                 // 데이터가 없을 때만 초기 예시 데이터 사용
-                 mediaData = [
-                    { "id": 1, "매체명": "A일보", "카테고리": "신문, 온라인", "담당자": "김민준", "직책": "기자", "이메일": "mj.kim@a-news.com", "팀메일": "team.a@a-news.com", "연락처": "010-1111-2222", "판매 대행사": "가나다 대행사", "소개서URL": "https://example.com" },
-                    { "id": 2, "매체명": "B 방송국", "카테고리": "방송", "담당자": "이서연", "직책": "PD", "이메일": "sy.lee@b-station.co.kr", "팀메일": "team.b@b-station.co.kr", "연락처": "010-2222-3333", "판매 대행사": "가나다 대행사", "소개서URL": "https://example.com" }
-                ];
-                mediaData = processRawData(mediaData);
-                saveDataToLocalStorage(mediaData);
-            }
-            populateCategories();
-            filterAndRender();
+            copyAllButton.addEventListener('click', () => {
+                if (currentFilteredData.length === 0) {
+                    showToast('복사할 데이터가 없습니다.', 'error');
+                    return;
+                }
+                const header = "매체명\t카테고리\t담당자\t직책\t이메일\t팀메일\t연락처\t판매 대행사\t소개서URL";
+                const rows = currentFilteredData.map(item => {
+                    const categories = (item.카테고리 || []).join(', ');
+                    return [
+                        item.매체명 || '', categories, item.담당자 || '', item.직책 || '',
+                        item.이메일 || '', item.팀메일 || '', item.연락처 || '',
+                        item['판매 대행사'] || '', item['소개서URL'] || ''
+                    ].join('\t');
+                });
+                const textToCopy = [header, ...rows].join('\n');
+                
+                if(copyTextToClipboard(textToCopy)) {
+                    showToast(`${currentFilteredData.length}개 매체의 정보가 복사되었습니다!`);
+                } else {
+                     showToast('전체 복사에 실패했습니다.', 'error');
+                }
+            });
+            
+            initializeFirebase();
+
+            window.addEventListener('unhandledrejection', function(event) {
+                console.error('Unhandled Promise Rejection:', event.reason);
+                showToast('예상치 못한 오류가 발생했습니다.', 'error');
+            });
         });
     </script>
 </body>
