@@ -54,7 +54,7 @@
         }
         .scrolling-banner-content {
             display: inline-block;
-            animation: marquee 25s linear infinite;
+            animation: marquee 30s linear infinite; /* 애니메이션 시간 조정 */
         }
         @keyframes marquee {
             from { transform: translateX(0%); }
@@ -75,10 +75,11 @@
     <!-- 롤링 배너 추가 -->
     <div class="scrolling-banner-container bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
         <div class="scrolling-banner-content py-2 font-semibold">
-            <span>디지털퍼스트 사내 배포 자료. 외부 공유금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span>디지털퍼스트 사내 배포 자료. 외부 공유금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span>디지털퍼스트 사내 배포 자료. 외부 공유금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            <span>디지털퍼스트 사내 배포 자료. 외부 공유금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <!-- 문구 및 간격 수정 -->
+            <span>디지털퍼스트 내부 배포 페이지입니다. 외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>디지털퍼스트 내부 배포 페이지입니다. 외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>디지털퍼스트 내부 배포 페이지입니다. 외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <span>디지털퍼스트 내부 배포 페이지입니다. 외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
         </div>
     </div>
 
@@ -194,7 +195,7 @@
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Firestore 데이터 경로를 보안 규칙과 일치하도록 수정
+                // Firestore 데이터 경로 설정
                 pocListDocRef = doc(db, 'media-poc-data', 'main-list');
 
                 onAuthStateChanged(auth, (user) => {
