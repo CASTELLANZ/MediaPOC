@@ -36,9 +36,9 @@
         }
         /* 다크모드 수정 input 스타일 */
         .dark .edit-input {
-            background-color: #334155;
-            border-color: #475569;
-            color: #e2e8f0;
+            background-color: #374151; /* gray-700 */
+            border-color: #4b5563;   /* gray-600 */
+            color: #e5e7eb;         /* gray-200 */
         }
         .edit-input:focus {
             outline: 2px solid transparent;
@@ -56,15 +56,15 @@
         }
     </script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
 
     <div id="toast-container" class="fixed top-5 right-5 z-50"></div>
 
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
         <!-- 시안 2 헤더 적용 -->
-        <header class="text-center mb-8 py-8 bg-white dark:bg-slate-800 border-b-4 border-blue-600 shadow-sm rounded-t-lg transition-colors duration-300">
-            <h1 class="text-3xl md:text-4xl font-bold text-slate-800 dark:text-slate-100">[SP]미디어 POC 리스트</h1>
-            <p class="text-slate-500 dark:text-slate-400 mt-2">매체명을 검색하거나 카테고리를 선택하여 담당자 정보를 확인하세요.</p>
+        <header class="text-center mb-8 py-8 bg-white dark:bg-gray-800 border-b-4 border-blue-600 shadow-sm rounded-t-lg transition-colors duration-300">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">[SP]미디어 POC 리스트</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">매체명을 검색하거나 카테고리를 선택하여 담당자 정보를 확인하세요.</p>
         </header>
         
         <main>
@@ -79,13 +79,13 @@
             </div>
 
             <!-- 컨트롤 패널 -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md mb-6 transition-colors duration-300">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-6 transition-colors duration-300">
                 <div class="mb-4">
-                    <label for="search-box" class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">매체명/담당자 검색</label>
-                    <input type="text" id="search-box" class="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="데이터를 불러오는 중...">
+                    <label for="search-box" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">매체명/담당자 검색</label>
+                    <input type="text" id="search-box" class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="데이터를 불러오는 중...">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">카테고리 선택 (중복 가능)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">카테고리 선택 (중복 가능)</label>
                     <div id="category-tags-container" class="flex flex-wrap gap-2">
                         <!-- 카테고리 태그가 동적으로 여기에 추가됩니다. -->
                     </div>
@@ -106,12 +106,12 @@
             </div>
             
             <!-- 결과 없음 메시지 -->
-            <div id="no-results" class="text-center py-16 px-6 bg-white dark:bg-slate-800 rounded-xl shadow-md hidden transition-colors duration-300">
-                <svg class="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div id="no-results" class="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hidden transition-colors duration-300">
+                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 19L13 13m-2.5-2.5A4.5 4.5 0 115.5 5.5a4.5 4.5 0 014.5 4.5zM21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
-                <h3 class="mt-2 text-lg font-medium text-slate-800 dark:text-slate-200">데이터를 찾을 수 없습니다.</h3>
-                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">데이터 파일을 업로드하여 시작하거나 검색어를 확인해 주세요.</p>
+                <h3 class="mt-2 text-lg font-medium text-gray-800 dark:text-gray-200">데이터를 찾을 수 없습니다.</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">데이터 파일을 업로드하여 시작하거나 검색어를 확인해 주세요.</p>
             </div>
 
 
@@ -124,16 +124,16 @@
             </div>
         </main>
 
-        <footer class="text-center mt-12 py-4 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
+        <footer class="text-center mt-12 py-4 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
              <div class="mb-2">
-                <label for="excel-upload" class="text-xs text-slate-500 dark:text-slate-400 underline cursor-pointer hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
+                <label for="excel-upload" class="text-xs text-gray-500 dark:text-gray-400 underline cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                     데이터파일 관리(SP팀)
                 </label>
                 <input type="file" id="excel-upload" accept=".xlsx, .xls, .csv">
-                <span id="file-name" class="ml-2 text-xs text-slate-500"></span>
+                <span id="file-name" class="ml-2 text-xs text-gray-500"></span>
              </div>
              <div>
-                <p class="text-xs text-slate-400 dark:text-slate-500">copyright © digitalFirst All Right Reserved.</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">copyright © digitalFirst All Right Reserved.</p>
              </div>
         </footer>
     </div>
@@ -264,7 +264,7 @@
             sortedCategories.forEach(category => {
                 const button = document.createElement('button');
                 // 다크모드 스타일 추가
-                button.className = 'category-tag px-3 py-1.5 rounded-full text-sm font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600';
+                button.className = 'category-tag px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600';
                 button.textContent = category;
                 button.dataset.category = category;
                 categoryTagsContainer.appendChild(button);
@@ -283,7 +283,7 @@
             data.forEach(item => {
                 const card = document.createElement('div');
                 card.id = `card-${item.id}`;
-                card.className = 'bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 flex flex-col transition-transform transform hover:-translate-y-1 transition-colors duration-300';
+                card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col transition-transform transform hover:-translate-y-1 transition-colors duration-300';
                 card.innerHTML = generateCardView(item);
                 mediaList.appendChild(card);
             });
@@ -291,14 +291,14 @@
         
         function generateCardView(item) {
             const categoryTagsHtml = (item.카테고리 || []).map(cat => 
-                `<span class="text-xs font-semibold text-blue-800 bg-blue-100 dark:text-blue-200 dark:bg-blue-900/50 px-2 py-1 rounded-full">${cat}</span>`
+                `<span class="text-xs font-semibold text-blue-800 bg-blue-100 dark:text-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">${cat}</span>`
             ).join('');
 
             let infoHtml = '';
             const createRow = (label, value, clipValue) => {
                 if (!value) return '';
-                const copyButton = clipValue ? `<button class="copy-button ml-auto shrink-0" data-clipboard="${clipValue}" aria-label="${label} 복사"><svg class="w-5 h-5 text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>` : '';
-                return `<div class="flex items-center"><span class="font-semibold text-slate-500 dark:text-slate-400 w-20 shrink-0">${label}</span><span class="text-slate-700 dark:text-slate-300 truncate" title="${value}">${value}</span>${copyButton}</div>`;
+                const copyButton = clipValue ? `<button class="copy-button ml-auto shrink-0" data-clipboard="${clipValue}" aria-label="${label} 복사"><svg class="w-5 h-5 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>` : '';
+                return `<div class="flex items-center"><span class="font-semibold text-gray-500 dark:text-gray-400 w-20 shrink-0">${label}</span><span class="text-gray-700 dark:text-gray-300 truncate" title="${value}">${value}</span>${copyButton}</div>`;
             };
 
             const contactPerson = item.담당자 ? `${item.담당자}${item.직책 ? ` / ${item.직책}` : ''}` : '';
@@ -310,13 +310,13 @@
             
             const introButtonHtml = item['소개서URL']
                 ? `<a href="${item['소개서URL']}" target="_blank" rel="noopener noreferrer" class="w-full text-center block bg-blue-600 text-white font-semibold text-sm py-2 px-4 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors">소개서 다운로드</a>`
-                : `<button class="w-full text-center block bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold text-sm py-2 px-4 rounded-lg cursor-not-allowed" disabled>소개서 없음</button>`;
+                : `<button class="w-full text-center block bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 font-semibold text-sm py-2 px-4 rounded-lg cursor-not-allowed" disabled>소개서 없음</button>`;
             
             return `
                 <div class="flex justify-between items-start gap-2 mb-4">
-                    <h2 class="text-xl font-bold text-slate-800 dark:text-slate-100 break-words" title="${item.매체명 || ''}">${item.매체명 || ''}</h2>
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 break-words" title="${item.매체명 || ''}">${item.매체명 || ''}</h2>
                     <div class="flex flex-col items-end space-y-1 flex-shrink-0">
-                        <button data-action="edit" data-id="${item.id}" class="text-xs text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400">수정</button>
+                        <button data-action="edit" data-id="${item.id}" class="text-xs text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400">수정</button>
                         <button data-action="delete" data-id="${item.id}" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400">삭제</button>
                     </div>
                 </div>
@@ -324,7 +324,7 @@
                     <div class="flex flex-wrap gap-2 mb-4">${categoryTagsHtml}</div>
                     <div class="space-y-3 text-sm">${infoHtml}</div>
                 </div>
-                 <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                 <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     ${introButtonHtml}
                 </div>
             `;
@@ -333,7 +333,7 @@
         function generateCardEditView(item) {
             const createInput = (name, label, value) => `
                 <div class="mb-2">
-                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400">${label}</label>
+                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400">${label}</label>
                     <input type="text" name="${name}" value="${value || ''}" class="edit-input">
                 </div>
             `;
@@ -350,7 +350,7 @@
                     ${createInput('판매 대행사', '판매 대행사', item['판매 대행사'])}
                     ${createInput('소개서URL', '소개서URL', item['소개서URL'])}
                     <div class="flex justify-end gap-2 mt-4">
-                        <button type="button" data-action="cancel" data-id="${item.id}" class="px-3 py-1 text-sm rounded-md bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200">취소</button>
+                        <button type="button" data-action="cancel" data-id="${item.id}" class="px-3 py-1 text-sm rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200">취소</button>
                         <button type="button" data-action="save" data-id="${item.id}" class="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700">저장</button>
                     </div>
                 </form>
@@ -434,7 +434,7 @@
                 
                 const card = document.createElement('div');
                 card.id = `card-${newItem.id}`;
-                card.className = 'bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 flex flex-col';
+                card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col';
                 card.dataset.isNew = 'true';
                 card.innerHTML = generateCardEditView(newItem);
                 
@@ -482,10 +482,10 @@
                 target.classList.toggle('dark:bg-blue-500');
                 target.classList.toggle('text-white');
                 target.classList.toggle('dark:text-white');
-                target.classList.toggle('bg-slate-200');
-                target.classList.toggle('dark:bg-slate-700');
-                target.classList.toggle('text-slate-700');
-                target.classList.toggle('dark:text-slate-300');
+                target.classList.toggle('bg-gray-200');
+                target.classList.toggle('dark:bg-gray-700');
+                target.classList.toggle('text-gray-700');
+                target.classList.toggle('dark:text-gray-300');
 
                 filterAndRender();
             });
@@ -510,7 +510,7 @@
                         showToast(`'${textToCopy}' 복사 완료!`);
                         button.innerHTML = `<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
                         setTimeout(() => {
-                            button.innerHTML = `<svg class="w-5 h-5 text-slate-400 hover:text-blue-600 dark:text-slate-500 dark:hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                            button.innerHTML = `<svg class="w-5 h-5 text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
                         }, 1500);
                     } else {
                         showToast('복사에 실패했습니다.', 'error');
@@ -530,9 +530,9 @@
                 } else if (action === 'delete') {
                     cardElement.innerHTML = `
                         <div class="flex flex-col items-center justify-center h-full p-4">
-                            <p class="text-sm text-slate-800 dark:text-slate-200 text-center font-semibold mb-4">정말로 삭제하시겠습니까?</p>
+                            <p class="text-sm text-gray-800 dark:text-gray-200 text-center font-semibold mb-4">정말로 삭제하시겠습니까?</p>
                             <div class="flex space-x-2">
-                                <button type="button" data-action="cancel-delete" data-id="${id}" class="px-3 py-1 text-sm rounded-md bg-slate-200 hover:bg-slate-300 dark:bg-slate-600 dark:hover:bg-slate-500 dark:text-slate-200">취소</button>
+                                <button type="button" data-action="cancel-delete" data-id="${id}" class="px-3 py-1 text-sm rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-gray-200">취소</button>
                                 <button type="button" data-action="confirm-delete" data-id="${id}" class="px-3 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">확인</button>
                             </div>
                         </div>
