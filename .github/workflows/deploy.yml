@@ -13,15 +13,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Replace Firebase Config 🤫
-        run: |
-          # API 키를 포함한 실제 설정 값을 가져와서 임시 파일에 저장
-          CONFIG_JSON=$(echo '${{ secrets.FIREBASE_CONFIG }}' | tr -d '[:space:]')
-          # index.html 파일에서 자리 표시자를 실제 설정 값으로 교체
-          sed -i "s|'FIREBASE_CONFIG_PLACEHOLDER'|${CONFIG_JSON}|g" index.html
+        uses: peter-evans/replace-text@v5
+        with:
+          file: index.html
+          from: "'FIREBASE_CONFIG_PLACEHOLDER'"
+          to: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          token: ${{ secrets.ACCESS_TOKEN }} # 방금 추가한 액세스 토큰 사용
+          token: ${{ secrets.ACCESS_TOKEN }}
           branch: gh-pages # 배포용 브랜치
           folder: . # 현재 폴더를 배포
