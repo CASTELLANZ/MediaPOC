@@ -200,19 +200,14 @@
         // --- Firebase 초기화 및 설정 ---
         async function initializeFirebase() {
             try {
-                // 환경 변수에서 Firebase 설정 안전하게 로드
-                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-
-                if (!firebaseConfigStr) {
-                    throw new Error("Firebase config not found. This app must be run in a secure environment where __firebase_config is provided.");
-                }
+                // 이 부분을 GitHub Actions가 실제 설정으로 교체합니다.
+                const firebaseConfig = 'FIREBASE_CONFIG_PLACEHOLDER';
                 
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                const app = initializeApp(firebaseConfig);
+                const app = initializeApp(JSON.parse(firebaseConfig));
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Firestore 데이터 경로를 보안 규칙과 일치하도록 수정
+                // Firestore 데이터 경로 설정
                 pocListDocRef = doc(db, 'media-poc-data', 'main-list');
 
                 onAuthStateChanged(auth, (user) => {
@@ -231,7 +226,7 @@
                 });
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
-                showToast("Firebase 설정에 실패했습니다.", "error");
+                showToast("Firebase 설정에 실패했거나, 안전하지 않은 환경에서 실행되었습니다.", "error");
             }
         }
         
