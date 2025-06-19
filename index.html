@@ -61,6 +61,30 @@
             from { transform: translateX(0%); }
             to { transform: translateX(-50%); }
         }
+        /* 마우스 오버 시 텍스트 롤링 효과 */
+        .hover-scroll-container {
+            min-width: 0;
+            overflow: hidden;
+        }
+        .hover-scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: bottom;
+        }
+        .hover-scroll-container.is-overflowing:hover .hover-scroll-text {
+            animation: scroll-text-kf 8s linear infinite;
+        }
+        .hover-scroll-container.is-overflowing .hover-scroll-text::after {
+            content: attr(data-text);
+            padding-left: 2rem;
+        }
+        @keyframes scroll-text-kf {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-50% - 1rem)); }
+        }
+
     </style>
     <script>
         // Tailwind CSS 다크모드 설정 (OS 설정을 따름)
@@ -202,19 +226,27 @@
             try {
                 // 환경 변수에서 Firebase 설정 안전하게 로드
                 const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
                 if (!firebaseConfigStr) {
-                    throw new Error("Firebase config not found. This app must be run in a secure environment where __firebase_config is provided.");
+                     // 로컬 테스트용 폴백 설정
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyCSSzKJGqAqvvoUcYFqhwTYGbTsJOTUCxc",
+                        authDomain: "mediapoc-24b16.firebaseapp.com",
+                        projectId: "mediapoc-24b16",
+                        storageBucket: "mediapoc-24b16.firebasestorage.app",
+                        messagingSenderId: "137478539730",
+                        appId: "1:137478539730:web:05400cc990d2955038600b"
+                    };
+                    initializeApp(firebaseConfig);
+                } else {
+                     initializeApp(JSON.parse(firebaseConfigStr));
                 }
+
+                db = getFirestore();
+                auth = getAuth();
                 
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Firestore 데이터 경로 설정 (환경 변수 사용)
-                pocListDocRef = doc(db, 'artifacts', appId, 'public', 'poc-list');
+                // Firestore 데이터 경로 설정 (보안 규칙과 일치하도록 수정)
+                pocListDocRef = doc(db, 'media-poc-data', 'main-list');
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
