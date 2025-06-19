@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>[SP]미디어 POC 리스트</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         /* Tailwind CSS를 기본으로 사용하되, 추가적인 커스텀 스타일을 적용합니다. */
@@ -73,7 +72,6 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
 
-    <!-- 롤링 배너 (상단) -->
     <div class="scrolling-banner-container bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
         <div class="scrolling-banner-content py-1 text-xs font-semibold">
             <span>디지털퍼스트 내부 배포 자료입니다. URL외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -86,14 +84,12 @@
     <div id="toast-container" class="fixed top-5 right-5 z-50"></div>
 
     <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <!-- 시안 2 헤더 적용 -->
         <header class="text-center mb-8 py-8 bg-white dark:bg-gray-800 border-b-4 border-blue-600 shadow-sm rounded-t-lg transition-colors duration-300">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100">[SP]미디어 POC 리스트</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-2">매체명을 검색하거나 카테고리를 선택하여 담당자 정보를 확인하세요.</p>
         </header>
         
         <main>
-            <!-- Firebase 인증 오류 메시지 영역 -->
             <div id="auth-error-message" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg hidden mb-6" role="alert">
                 <p class="font-bold">Firebase 인증 오류</p>
                 <p>데이터베이스에 연결할 수 없습니다. Firebase 콘솔에서 다음을 확인해주세요:</p>
@@ -103,7 +99,6 @@
                 </ul>
             </div>
 
-            <!-- 컨트롤 패널 -->
             <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-6 transition-colors duration-300">
                 <div class="mb-4">
                     <label for="search-box" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">매체명/담당자 검색</label>
@@ -112,12 +107,10 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">카테고리 선택 (중복 가능)</label>
                     <div id="category-tags-container" class="flex flex-wrap gap-2">
-                        <!-- 카테고리 태그가 동적으로 여기에 추가됩니다. -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
-            <!-- 신규 추가 버튼 -->
             <div class="mb-6 text-right">
                 <button id="add-new-card-button" class="bg-blue-600 text-white font-bold text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors shadow-md inline-flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -125,12 +118,9 @@
                 </button>
             </div>
 
-            <!-- 결과 영역 -->
             <div id="media-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- 매체 정보 카드가 여기에 동적으로 추가됩니다. -->
-            </div>
+                </div>
             
-            <!-- 결과 없음 메시지 -->
             <div id="no-results" class="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-xl shadow-md hidden transition-colors duration-300">
                 <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 19L13 13m-2.5-2.5A4.5 4.5 0 115.5 5.5a4.5 4.5 0 014.5 4.5zM21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -140,7 +130,6 @@
             </div>
 
 
-            <!-- 전체 복사 버튼 컨테이너 -->
             <div id="copy-all-container" class="mt-8 text-center hidden">
                 <button id="copy-all-button" class="bg-green-600 text-white font-bold text-sm py-2.5 px-5 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors shadow-lg">
                     <svg class="inline-block w-5 h-5 mr-2 -mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
@@ -163,7 +152,6 @@
         </footer>
     </div>
 
-    <!-- 페이지 이동 버튼 -->
     <div class="fixed bottom-12 right-6 flex flex-col gap-2 z-40">
         <button id="scroll-to-top" title="맨 위로" class="w-10 h-10 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-opacity opacity-0">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
@@ -173,7 +161,6 @@
         </button>
     </div>
 
-    <!-- 롤링 배너 (하단) -->
     <div class="scrolling-banner-container bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300 fixed bottom-0 left-0 z-30">
         <div class="scrolling-banner-content py-1 text-xs font-semibold">
             <span>디지털퍼스트 내부 배포 자료입니다. URL외부 공유 금지.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -183,7 +170,6 @@
         </div>
     </div>
 
-    <!-- 스크립트를 body의 맨 마지막으로 이동 -->
     <script type="module">
         // Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
@@ -296,8 +282,11 @@
             const allCategories = new Set(mediaData.flatMap(item => item.카테고리).filter(Boolean));
             const sortedCategories = [...allCategories].sort();
             
+            // '전체' 버튼 생성 로직 삭제
+            
             sortedCategories.forEach(category => {
                 const button = document.createElement('button');
+                // 다크모드 스타일 추가
                 button.className = 'category-tag px-3 py-1.5 rounded-full text-sm font-semibold bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600';
                 button.textContent = category;
                 button.dataset.category = category;
