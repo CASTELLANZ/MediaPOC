@@ -200,23 +200,21 @@
         // --- Firebase 초기화 및 설정 ---
         async function initializeFirebase() {
             try {
-                // 사용자가 제공한 Firebase 설정
-                const firebaseConfig = {
-                    apiKey: "AIzaSyCSSzKJGqAqvvoUcYFqhwTYGbTsJOTUCxc",
-                    authDomain: "mediapoc-24b16.firebaseapp.com",
-                    projectId: "mediapoc-24b16",
-                    storageBucket: "mediapoc-24b16.firebasestorage.app",
-                    messagingSenderId: "137478539730",
-                    appId: "1:137478539730:web:05400cc990d2955038600b",
-                    measurementId: "G-HKJ01TSQP6"
-                };
+                // 환경 변수에서 Firebase 설정 안전하게 로드
+                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : null;
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+                if (!firebaseConfigStr) {
+                    throw new Error("Firebase config not found. This app must be run in a secure environment where __firebase_config is provided.");
+                }
                 
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
                 
-                // Firestore 데이터 경로 설정
-                pocListDocRef = doc(db, 'media-poc-data', 'main-list');
+                // Firestore 데이터 경로 설정 (환경 변수 사용)
+                pocListDocRef = doc(db, 'artifacts', appId, 'public', 'poc-list');
 
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
